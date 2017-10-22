@@ -76,6 +76,9 @@ log_error = /var/log/mysql/error.log
 #log_slow_queries	= /var/log/mysql/mysql-slow.log
 #long_query_time = 2
 #log-queries-not-using-indexes
+slow_query_log=1
+log_slow_queries = /var/log/mysql/mysql-slow.log
+long_query_time=0.5
 #
 # The following can be used as easy to replay backup logs or for replication.
 # note: if you are setting up a replication slave, see README.Debian about
@@ -91,6 +94,10 @@ max_binlog_size   = 100M
 #
 # InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
 # Read the manual for more InnoDB related options. There are many!
+innodb_flush_log_at_trx_commit = 0
+innodb_doublewrite=0
+innodb_flush_method = nosync
+innodb_buffer_pool_size = 512M 
 #
 # * Security Features
 #
