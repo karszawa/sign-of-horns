@@ -475,14 +475,20 @@ func fetchUnread(c echo.Context) error {
 		var cnt int64
 		if isEndFlg || chId != channelId {
 			fmt.Println(3)
-			_ = db.Get(&cnt,
+			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 				chId)
-		}else {
+			if err !=nil {
+				fmt.Println(err)
+			}
+		} else {
 			fmt.Println(4)
-			_ = db.Get(&cnt,
+			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
 				chId, msgId)
+			if err!= nil {
+				fmt.Println(err)
+			}
 				if chIdAndMessageIds.Next() {
 					chIdAndMessageIds.Scan(&chId, &msgId)
 				}else {
