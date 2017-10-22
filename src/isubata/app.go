@@ -445,9 +445,10 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 	
-	s := "SELECT channel.id, haveread.message_id" +
-		"FROM channel, haveread" +
-				"WHERE channel.id = haveread.channel_id, haveread.user_id = ?"
+	s := "select id ,message_id " +
+		"FROM channel INNER JOIN haveread " +
+			"ON channel.id = haveread.channel_id " +
+				"where haveread.user_id = ?"
 	chIdAndMessageIds, err := db.Query(s, userID)
 	
 	resp := []map[string]interface{}{}
