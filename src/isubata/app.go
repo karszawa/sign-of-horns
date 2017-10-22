@@ -470,6 +470,7 @@ func fetchUnread(c echo.Context) error {
 	}
 	
 	for _, channelId := range channels {
+		fmt.Println("start roop")
 		fmt.Println(2)
 		var cnt int64
 		if isEndFlg || chId != channelId {
@@ -493,8 +494,9 @@ func fetchUnread(c echo.Context) error {
 			"channel_id": chId,
 			"unread":     cnt}
 		resp = append(resp, r)
+		fmt.Println("end roop")
 	}
-
+	fmt.Println("end fetch")
 	return c.JSON(http.StatusOK, resp)
 }
 
