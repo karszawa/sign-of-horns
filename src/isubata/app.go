@@ -781,7 +781,7 @@ func getIcon(c echo.Context) error {
 
 		return c.Blob(http.StatusOK, mime, data)
 	} else {
-		return 	c.Redirect(http.StatusSeeOther, fmt.Sprint("http://%s/icons/%s", pair_ip, name))
+		return c.Redirect(http.StatusSeeOther, fmt.Sprintf("http://%s/icons/%s", pair_ip, name))
 	}
 }
 
