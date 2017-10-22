@@ -38,3 +38,10 @@ CREATE TABLE haveread (
   created_at DATETIME NOT NULL,
   PRIMARY KEY(user_id, channel_id)
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE INDEX created_at_key ON user (created_at);
+CREATE INDEX channel_id_key ON message (channel_id);
+CREATE INDEX user_id_key ON message (user_id);
+CREATE INDEX user_id_key ON haveread (user_id);
+CREATE INDEX channel_id_key ON haveread (channel_id);
+CREATE INDEX message_id_key ON haveread (message_id);
