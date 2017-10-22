@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -359,8 +360,6 @@ func jsonifyMessage(m Message) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	fmt.Printf("avatar_icon: %s\n", u.AvatarIcon)
-
 	r := make(map[string]interface{})
 	r["id"] = m.ID
 	r["user"] = u
@@ -671,13 +670,12 @@ func postProfile(c echo.Context) error {
 		// if err != nil {
 		// 	return err
 		// }
-		// avatarData, _ = ioutil.ReadAll(old_file)
-		// old_file.Close()
-		//
+		avatarData, _ := ioutil.ReadAll(file)
+
 		// NOTE: これは必要かも？
-		// if len(avatarData) > avatarMaxBytes {
-		// 	return ErrBadReqeust
-		// }
+		if len(avatarData) > avatarMaxBytes {
+			return ErrBadReqeust
+		}
 
 		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
 	}
