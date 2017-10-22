@@ -445,41 +445,58 @@ func fetchUnread(c echo.Context) error {
 	if userID == 0 {
 		return c.NoContent(http.StatusForbidden)
 	}
-
+	
 	time.Sleep(time.Second)
-
-	channels, err := queryChannels()
-	if err != nil {
-		return err
-	}
-
+	
+	s := "select id ,message_id " +
+		"FROM channel INNER JOIN haveread " +
+			"ON channel.id = haveread.channel_id " +
+				"where haveread.user_id = ?"
+	chIdAndMessageIds, _ := db.Query(s, userID)
+	
 	resp := []map[string]interface{}{}
-
-	for _, chID := range channels {
-		lastID, err := queryHaveRead(userID, chID)
-		if err != nil {
-			return err
-		}
-
+	
+	channels, _ := queryChannels()
+	
+	var (
+		chId  int64 = -1
+		msgId int64
+	)
+	
+	
+	var isEndFlg bool
+	if !chIdAndMessageIds.Next() {
+		isEndFlg = true
+	} else {
+		isEndFlg = false
+	}
+	chIdAndMessageIds.Scan(&chId,&msgId)
+	
+	for _, channelId := range channels {
 		var cnt int64
-		if lastID > 0 {
-			err = db.Get(&cnt,
-				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
-				chID, lastID)
-		} else {
-			err = db.Get(&cnt,
+		if isEndFlg || chId != channelId {
+			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
-				chID)
-		}
-		if err != nil {
-			return err
+				channelId)
+			if err !=nil {
+			}
+		} else {
+			err := db.Get(&cnt,
+				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
+					channelId, msgId)
+			if err!= nil {
+			}
+			if chIdAndMessageIds.Next() {
+				chIdAndMessageIds.Scan(&chId, &msgId)
+			}else {
+				isEndFlg = true
+			}
 		}
 		r := map[string]interface{}{
-			"channel_id": chID,
+			"channel_id": channelId,
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
-
 	return c.JSON(http.StatusOK, resp)
 }
 
