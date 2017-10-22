@@ -441,37 +441,47 @@ func fetchUnread(c echo.Context) error {
 	if userID == 0 {
 		return c.NoContent(http.StatusForbidden)
 	}
-
+	
+	
+	
+	s := "SELECT channel.id, haveread.message_id" +
+		"FROM channel, haveread" +
+				"WHERE channel.id = haveread.channel_id, haveread.user_id = ?"
+	chIdAndMessageIds, err := db.Query(s, userID)
+	
+	// ??
 	time.Sleep(time.Second)
-
-	channels, err := queryChannels()
-	if err != nil {
-		return err
-	}
-
+	
 	resp := []map[string]interface{}{}
 
-	for _, chID := range channels {
-		lastID, err := queryHaveRead(userID, chID)
+	for chIdAndMessageIds.Next() {
+		
+		var (
+			chId  int64
+			msgId int64
+		)
+		
+		chIdAndMessageIds.Scan(&chId,&msgId)
+		
 		if err != nil {
 			return err
 		}
 
 		var cnt int64
-		if lastID > 0 {
+		if msgId > 0 {
 			err = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
-				chID, lastID)
+				chId, msgId)
 		} else {
 			err = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
-				chID)
+				chId)
 		}
 		if err != nil {
 			return err
 		}
 		r := map[string]interface{}{
-			"channel_id": chID,
+			"channel_id": chId,
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
