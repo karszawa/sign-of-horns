@@ -460,6 +460,7 @@ func fetchUnread(c echo.Context) error {
 		msgId int64
 	)
 	chIdAndMessageIds.Scan(&chId,&msgId)
+	fmt.Println("chid: %ld, msgid: %ld", chId, msgId)
 	var isEndFlg bool
 	if chId == -1{
 		isEndFlg = true
