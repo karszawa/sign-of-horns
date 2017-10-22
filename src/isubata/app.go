@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"bytes"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -436,6 +437,7 @@ func queryHaveRead(userID, chID int64) (int64, error) {
 	return h.MessageID, nil
 }
 
+// NOTE: 重そう
 func fetchUnread(c echo.Context) error {
 	userID := sessUserID(c)
 	if userID == 0 {
@@ -619,6 +621,52 @@ func postAddChannel(c echo.Context) error {
 	lastID, _ := res.LastInsertId()
 	return c.Redirect(http.StatusSeeOther,
 		fmt.Sprintf("/channel/%v", lastID))
+}
+
+func exportImages() {
+	users := []User{}
+
+	db.Select(&users, "SELECT * FROM user ORDER BY id")
+
+	for _, user := range users {
+		fmt.Println("Processing %d", )
+		var name string
+		var data []byte
+
+		err := db.QueryRow("SELECT name, data FROM image WHERE name = ?", user.AvatarIcon).Scan(&name, &data)
+		if err == sql.ErrNoRows {
+			fmt.Println(err)
+		}
+
+		dotPos := strings.LastIndexByte(name, '.')
+		if dotPos < 0 {
+			fmt.Println("Err: can not know ext")
+		}
+
+		filename := fmt.Sprintf("~/isubata/webapp/public/%d.%s", user.ID, name[dotPos:])
+
+		file, ferr := os.Create(filename)
+
+		if ferr != nil {
+			fmt.Println("bynary write error:", ferr)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		err2 := binary.Write(buf, binary.BigEndian, data)
+		if err2 != nil {
+			fmt.Println("bynary write error:", err2)
+			return
+		}
+
+		_, err3 := file.Write(buf.Bytes())
+		if err3 != nil {
+			fmt.Println("file write err:", err3)
+			return
+		}
+	}
+
+	fmt.Println("Done")
 }
 
 func postProfile(c echo.Context) error {
