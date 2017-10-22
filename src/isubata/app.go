@@ -34,6 +34,7 @@ const (
 var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
+	allUnreadMsgCntCache map[int64]int64
 )
 
 type Renderer struct {
@@ -419,27 +420,6 @@ func queryChannels() ([]int64, error) {
 	return res, err
 }
 
-func queryHaveRead(userID, chID int64) (int64, error) {
-	type HaveRead struct {
-		UserID    int64     `db:"user_id"`
-		ChannelID int64     `db:"channel_id"`
-		MessageID int64     `db:"message_id"`
-		UpdatedAt time.Time `db:"updated_at"`
-		CreatedAt time.Time `db:"created_at"`
-	}
-	h := HaveRead{}
-
-	err := db.Get(&h, "SELECT * FROM haveread WHERE user_id = ? AND channel_id = ?",
-		userID, chID)
-
-	if err == sql.ErrNoRows {
-		return 0, nil
-	} else if err != nil {
-		return 0, err
-	}
-	return h.MessageID, nil
-}
-
 func fetchUnread(c echo.Context) error {
 	userID := sessUserID(c)
 	if userID == 0 {
@@ -475,10 +455,13 @@ func fetchUnread(c echo.Context) error {
 	for _, channelId := range channels {
 		var cnt int64
 		if isEndFlg || chId != channelId {
-			err := db.Get(&cnt,
-				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
-				channelId)
-			if err !=nil {
+			_, ok := allUnreadMsgCntCache[channelId]
+			if !ok{
+				_ = db.Get(&cnt,
+					"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
+					channelId)
+			} else {
+				cnt = allUnreadMsgCntCache[channelId]
 			}
 		} else {
 			err := db.Get(&cnt,
