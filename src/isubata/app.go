@@ -34,7 +34,7 @@ const (
 var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
-	allUnreadMsgCntCache map[int64]int64
+	allUnreadMsgCntCache = make(map[int64]int64)
 )
 
 type Renderer struct {
