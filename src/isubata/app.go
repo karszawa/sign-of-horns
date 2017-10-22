@@ -633,7 +633,7 @@ func postProfile(c echo.Context) error {
 
 	avatarName := ""
 
-	var avatarData []byte
+	var dataSize int64
 
 	if fh, err := c.FormFile("avatar_icon"); err == http.ErrMissingFile {
 		// no file upload
@@ -653,7 +653,8 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		if fh.Size > avatarMaxBytes {
+		dataSize = fh.Size
+		if dataSize > avatarMaxBytes {
 			return ErrBadReqeust
 		}
 
@@ -676,6 +677,7 @@ func postProfile(c echo.Context) error {
     }
 
 		defer file.Close()
+		defer dst.Close()
 
 		// buf := new(bytes.Buffer)
 		// _ = binary.Write(buf, binary.BigEndian, avatarData)
@@ -694,7 +696,7 @@ func postProfile(c echo.Context) error {
 		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
 	}
 
-	if avatarName != "" && len(avatarData) > 0 {
+	if avatarName != "" && dataSize > 0 {
 		// _, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
 		// if err != nil {
 		// 	return err
