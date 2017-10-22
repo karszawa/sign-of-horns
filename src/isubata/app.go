@@ -455,16 +455,17 @@ func fetchUnread(c echo.Context) error {
 	channels, _ := queryChannels()
 	
 	var (
-		chId  int64 = -1
+		chId  int64
 		msgId int64
 	)
-	chIdAndMessageIds.Scan(&chId,&msgId)
+	
 	var isEndFlg bool
-	if chId == -1{
+	if chIdAndMessageIds.Next(){
 		isEndFlg = true
 	} else {
 		isEndFlg = false
 	}
+	chIdAndMessageIds.Scan(&chId,&msgId)
 	
 	for _, channelId := range channels {
 		var cnt int64
@@ -480,11 +481,11 @@ func fetchUnread(c echo.Context) error {
 					channelId, msgId)
 			if err!= nil {
 			}
-				if chIdAndMessageIds.Next() {
-					chIdAndMessageIds.Scan(&chId, &msgId)
-				}else {
-					isEndFlg = true
-				}
+			if chIdAndMessageIds.Next() {
+				chIdAndMessageIds.Scan(&chId, &msgId)
+			}else {
+				isEndFlg = true
+			}
 		}
 		r := map[string]interface{}{
 			"channel_id": channelId,
