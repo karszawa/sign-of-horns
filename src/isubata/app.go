@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 	"net"
+	"io/ioutil"
 	// "bytes"
 	_ "net/http/pprof"
 
@@ -452,25 +453,25 @@ func fetchUnread(c echo.Context) error {
 	if userID == 0 {
 		return c.NoContent(http.StatusForbidden)
 	}
-	
+
 	time.Sleep(time.Second)
-	
+
 	s := "select id ,message_id " +
 		"FROM channel INNER JOIN haveread " +
 			"ON channel.id = haveread.channel_id " +
 				"where haveread.user_id = ?"
 	chIdAndMessageIds, _ := db.Query(s, userID)
-	
+
 	resp := []map[string]interface{}{}
-	
+
 	channels, _ := queryChannels()
-	
+
 	var (
 		chId  int64 = -1
 		msgId int64
 	)
-	
-	
+
+
 	var isEndFlg bool
 	if !chIdAndMessageIds.Next() {
 		isEndFlg = true
@@ -478,7 +479,7 @@ func fetchUnread(c echo.Context) error {
 		chIdAndMessageIds.Scan(&chId,&msgId)
 		isEndFlg = false
 	}
-	
+
 	for _, channelId := range channels {
 		var cnt int64
 		if isEndFlg || chId != channelId {
@@ -743,16 +744,18 @@ func postProfile(c echo.Context) error {
 }
 
 func getIcon(c echo.Context) error {
-	var name string
-	var data []byte
-	err := db.QueryRow("SELECT name, data FROM image WHERE name = ?",
-		c.Param("file_name")).Scan(&name, &data)
-	if err == sql.ErrNoRows {
-		return echo.ErrNotFound
-	}
-	if err != nil {
-		return err
-	}
+	// var name string
+	// var data []byte
+	// err := db.QueryRow("SELECT name, data FROM image WHERE name = ?",
+	// 	c.Param("file_name")).Scan(&name, &data)
+	// if err == sql.ErrNoRows {
+	// 	return echo.ErrNotFound
+	// }
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	name := c.Param("file_name")
 
 	mime := ""
 	switch true {
@@ -765,6 +768,19 @@ func getIcon(c echo.Context) error {
 	default:
 		return echo.ErrNotFound
 	}
+
+	var data []byte
+
+	for {
+		_, err := os.Stat(name)
+
+		if err != nil {
+			data, _ = ioutil.ReadFile(name)
+
+			break
+		}
+	}
+
 	return c.Blob(http.StatusOK, mime, data)
 }
 
