@@ -649,7 +649,7 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		dst, oerr = os.Create(fmt.Sprintf("%d%s", self.ID, ext))
+		dst, oerr := os.Create(fmt.Sprintf("%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
 			return
