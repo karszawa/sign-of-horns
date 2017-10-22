@@ -756,5 +756,5 @@ func main() {
 	e.POST("add_channel", postAddChannel)
 	e.GET("/icons/:file_name", getIcon)
 
-	e.Start(":5000")
+	e.Start("/var/run/webapp/webapp.cosk")
 }
