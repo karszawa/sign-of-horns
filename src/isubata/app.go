@@ -461,6 +461,7 @@ func fetchUnread(c echo.Context) error {
 	)
 	chIdAndMessageIds.Scan(&chId,&msgId)
 	fmt.Println("chid: %ld, msgid: %ld", chId, msgId)
+	fmt.Println(1)
 	var isEndFlg bool
 	if chId == -1{
 		isEndFlg = true
@@ -469,12 +470,15 @@ func fetchUnread(c echo.Context) error {
 	}
 	
 	for _, channelId := range channels {
+		fmt.Println(2)
 		var cnt int64
 		if isEndFlg || chId != channelId {
+			fmt.Println(3)
 			_ = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 				chId)
 		}else {
+			fmt.Println(4)
 			_ = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
 				chId, msgId)
@@ -484,6 +488,7 @@ func fetchUnread(c echo.Context) error {
 					isEndFlg = true
 				}
 		}
+		fmt.Println(5)
 		r := map[string]interface{}{
 			"channel_id": chId,
 			"unread":     cnt}
