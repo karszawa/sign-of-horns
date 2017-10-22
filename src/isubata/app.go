@@ -460,6 +460,7 @@ func fetchUnread(c echo.Context) error {
 				_ = db.Get(&cnt,
 					"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 					channelId)
+				allUnreadMsgCntCache[channelId] = cnt
 			} else {
 				cnt = allUnreadMsgCntCache[channelId]
 			}
