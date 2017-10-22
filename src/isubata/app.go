@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -630,7 +629,9 @@ func postProfile(c echo.Context) error {
 	}
 
 	avatarName := ""
-	var avatarData []byte
+
+	// NOTE: 保存しないようになった
+	// var avatarData []byte
 
 	if fh, err := c.FormFile("avatar_icon"); err == http.ErrMissingFile {
 		// no file upload
@@ -649,7 +650,7 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		dst, oerr := os.Create(fmt.Sprintf("%d%s", self.ID, ext))
+		dst, oerr := os.Create(fmt.Sprintf("../public/image/%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
 			return oerr
@@ -660,29 +661,30 @@ func postProfile(c echo.Context) error {
 			return err
 		}
 		defer file.Close()
+
 		io.Copy(dst, file)
 
-		// NOTE: 静的ファイルを参照するようになったら消す
+		// NOTE: 静的ファイルを参照するようになったので消す
+		// old_file, err := fh.Open()
+		// if err != nil {
+		// 	return err
+		// }
+		// avatarData, _ = ioutil.ReadAll(old_file)
+		// old_file.Close()
+		//
+		// NOTE: これは必要かも？
+		// if len(avatarData) > avatarMaxBytes {
+		// 	return ErrBadReqeust
+		// }
 
-		old_file, err := fh.Open()
-		if err != nil {
-			return err
-		}
-		avatarData, _ = ioutil.ReadAll(old_file)
-		old_file.Close()
-
-		if len(avatarData) > avatarMaxBytes {
-			return ErrBadReqeust
-		}
-
-		avatarName = fmt.Sprintf("%x%s", sha1.Sum(avatarData), ext)
+		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
 	}
 
-	if avatarName != "" && len(avatarData) > 0 {
-		_, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
-		if err != nil {
-			return err
-		}
+	if avatarName != "" {
+		// _, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
+		// if err != nil {
+		// 	return err
+		// }
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
 			return err
