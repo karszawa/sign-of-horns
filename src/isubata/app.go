@@ -439,7 +439,6 @@ func queryHaveRead(userID, chID int64) (int64, error) {
 }
 
 func fetchUnread(c echo.Context) error {
-	fmt.Println("start fetch")
 	userID := sessUserID(c)
 	if userID == 0 {
 		return c.NoContent(http.StatusForbidden)
@@ -460,8 +459,6 @@ func fetchUnread(c echo.Context) error {
 		msgId int64
 	)
 	chIdAndMessageIds.Scan(&chId,&msgId)
-	fmt.Println("chid: %ld, msgid: %ld", chId, msgId)
-	fmt.Println(1)
 	var isEndFlg bool
 	if chId == -1{
 		isEndFlg = true
@@ -470,24 +467,18 @@ func fetchUnread(c echo.Context) error {
 	}
 	
 	for _, channelId := range channels {
-		fmt.Println("start roop")
-		fmt.Println(2)
 		var cnt int64
 		if isEndFlg || chId != channelId {
-			fmt.Println(3)
 			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 				channelId)
 			if err !=nil {
-				fmt.Println(err)
 			}
 		} else {
-			fmt.Println(4)
 			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
 					channelId, msgId)
 			if err!= nil {
-				fmt.Println(err)
 			}
 				if chIdAndMessageIds.Next() {
 					chIdAndMessageIds.Scan(&chId, &msgId)
@@ -495,14 +486,11 @@ func fetchUnread(c echo.Context) error {
 					isEndFlg = true
 				}
 		}
-		fmt.Println(5)
 		r := map[string]interface{}{
 			"channel_id": channelId,
 			"unread":     cnt}
 		resp = append(resp, r)
-		fmt.Println("end roop")
 	}
-	fmt.Println("end fetch")
 	return c.JSON(http.StatusOK, resp)
 }
 
