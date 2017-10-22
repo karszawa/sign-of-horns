@@ -455,16 +455,21 @@ func fetchUnread(c echo.Context) error {
 	
 	channels, _ := queryChannels()
 	
-	chIdAndMessageIds.Next()
 	var (
-		chId  int64
+		chId  int64 = -1
 		msgId int64
 	)
 	chIdAndMessageIds.Scan(&chId,&msgId)
+	var isEndFlg bool
+	if chId == -1{
+		isEndFlg = true
+	} else {
+		isEndFlg = false
+	}
 	
 	for _, channelId := range channels {
 		var cnt int64
-		if chId != channelId {
+		if isEndFlg || chId != channelId {
 			_ = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 				chId)
@@ -472,8 +477,11 @@ func fetchUnread(c echo.Context) error {
 			_ = db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
 				chId, msgId)
-				chIdAndMessageIds.Next()
-				chIdAndMessageIds.Scan(&chId,&msgId)
+				if chIdAndMessageIds.Next() {
+					chIdAndMessageIds.Scan(&chId, &msgId)
+				}else {
+					isEndFlg = true
+				}
 		}
 		r := map[string]interface{}{
 			"channel_id": chId,
