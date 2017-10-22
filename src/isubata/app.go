@@ -662,7 +662,13 @@ func postProfile(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+
+		avatarData, _ = ioutil.ReadAll(file)
+
+		// NOTE: これは必要かも？
+		if len(avatarData) > avatarMaxBytes {
+			return ErrBadReqeust
+		}
 
 		io.Copy(dst, file)
 
@@ -671,14 +677,10 @@ func postProfile(c echo.Context) error {
 		// if err != nil {
 		// 	return err
 		// }
-		avatarData, _ = ioutil.ReadAll(file)
-
-		// NOTE: これは必要かも？
-		if len(avatarData) > avatarMaxBytes {
-			return ErrBadReqeust
-		}
 
 		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
+
+		file.Close()
 	}
 
 	if avatarName != "" && len(avatarData) > 0 {
