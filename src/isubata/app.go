@@ -34,6 +34,7 @@ const (
 var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
+    users_map map[int64]User
 )
 
 type Renderer struct {
@@ -356,11 +357,17 @@ func postMessage(c echo.Context) error {
 
 func jsonifyMessage(m Message) (map[string]interface{}, error) {
 	u := User{}
-	err := db.Get(&u, "SELECT name, display_name, avatar_icon FROM user WHERE id = ?",
-		m.UserID)
-	if err != nil {
-		return nil, err
-	}
+    user, ok := users_map[m.UserID]
+    if ok {
+        u = user
+    } else {
+	    err := db.Get(&u, "SELECT name, display_name, avatar_icon FROM user WHERE id = ?",
+		    m.UserID)
+	    if err != nil {
+		    return nil, err
+	    }
+        users_map[m.UserID] = u
+    }
 
 	r := make(map[string]interface{})
 	r["id"] = m.ID
@@ -725,6 +732,7 @@ func tRange(a, b int64) []int64 {
 }
 
 func main() {
+    users_map = make(map[int64]User, 1500)
 	e := echo.New()
 	funcs := template.FuncMap{
 		"add":    tAdd,
