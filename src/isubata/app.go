@@ -347,7 +347,7 @@ func postMessage(c echo.Context) error {
 
     go func(chanID int64, user_id int64, message string) {
 	    if _, err := addMessage(chanID, user_id, message); err != nil {
-    		return 
+    		return
     	}
     }(chanID, user.ID, message)
 
@@ -633,8 +633,7 @@ func postProfile(c echo.Context) error {
 
 	avatarName := ""
 
-	// NOTE: 保存しないようになった
-	// var avatarData []byte
+	var avatarData []byte
 
 	if fh, err := c.FormFile("avatar_icon"); err == http.ErrMissingFile {
 		// no file upload
@@ -672,7 +671,7 @@ func postProfile(c echo.Context) error {
 		// if err != nil {
 		// 	return err
 		// }
-		avatarData, _ := ioutil.ReadAll(file)
+		avatarData, _ = ioutil.ReadAll(file)
 
 		// NOTE: これは必要かも？
 		if len(avatarData) > avatarMaxBytes {
@@ -682,7 +681,7 @@ func postProfile(c echo.Context) error {
 		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
 	}
 
-	if avatarName != "" {
+	if avatarName != "" && len(avatarData) > 0 {
 		// _, err := db.Exec("INSERT INTO image (name, data) VALUES (?, ?)", avatarName, avatarData)
 		// if err != nil {
 		// 	return err
