@@ -650,7 +650,7 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		dst, oerr := os.Create(fmt.Sprintf("../public/image/%d%s", self.ID, ext))
+		dst, oerr := os.Create(fmt.Sprintf("../public/icons/%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
 			return oerr
