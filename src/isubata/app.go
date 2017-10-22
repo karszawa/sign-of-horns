@@ -345,9 +345,11 @@ func postMessage(c echo.Context) error {
 		chanID = int64(x)
 	}
 
-	if _, err := addMessage(chanID, user.ID, message); err != nil {
-		return err
-	}
+    go func(chanID int64, user_id int64, message string) {
+	    if _, err := addMessage(chanID, user_id, message); err != nil {
+    		return 
+    	}
+    }(chanID, user.ID, message)
 
 	return c.NoContent(204)
 }
@@ -750,9 +752,11 @@ func main() {
 		templates: template.Must(template.New("").Funcs(funcs).ParseGlob("views/*.html")),
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secretonymoris"))))
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+    /*
+    e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
 	}))
+    */
 	e.Use(middleware.Static("../public"))
 	
 	go http.ListenAndServe(":3000", nil)
