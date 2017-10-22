@@ -645,6 +645,7 @@ func postProfile(c echo.Context) error {
 		if dotPos < 0 {
 			return ErrBadReqeust
 		}
+
 		ext := fh.Filename[dotPos:]
 		switch ext {
 		case ".jpg", ".jpeg", ".png", ".gif":
@@ -653,25 +654,14 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		fmt.Printf("fh.Size: %d\n", fh.Size)
+		if fh.Size > avatarMaxBytes {
+			return ErrBadReqeust
+		}
 
 		dst, oerr := os.Create(fmt.Sprintf("/home/isucon/isubata/webapp/public/icons/%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
 			return oerr
-		}
-
-		file, err := fh.Open()
-		if err != nil {
-			return err
-		}
-
-		avatarData, _ = ioutil.ReadAll(file)
-		fmt.Printf("len(avatarData): %d\n", len(avatarData))
-
-		// NOTE: これは必要かも？
-		if len(avatarData) > avatarMaxBytes {
-			return ErrBadReqeust
 		}
 
 		_, err = io.Copy(dst, file)
@@ -694,8 +684,6 @@ func postProfile(c echo.Context) error {
 		// }
 
 		avatarName = fmt.Sprintf("%d%s", self.ID, ext)
-
-		file.Close()
 	}
 
 	if avatarName != "" && len(avatarData) > 0 {
