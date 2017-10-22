@@ -13,6 +13,7 @@ import (
 	"bytes"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -44,16 +45,8 @@ func init() {
 	dsn := fmt.Sprintf("%s%s@tcp(%s:%s)/isubata?parseTime=true&loc=Local&charset=utf8mb4",
 		db_user, db_password, db_host, db_port)
 
-	log.Printf("Connecting to db: %q", dsn)
-	db, _ = sqlx.Connect("mysql", dsn)
-	for {
-		err := db.Ping()
-		if err == nil {
-			break
-		}
-		log.Println(err)
-		time.Sleep(time.Second * 3)
-	}
+	fmt.Printf("Connecting to db: %q", dsn)
+	db, _ = sqlx.Open("mysql", dsn)
 
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(5 * time.Minute)
@@ -71,12 +64,17 @@ type User struct {
 }
 
 func exportImages() {
-	users := []User{}
+	var users []User
 
-	db.Select(&users, "SELECT * FROM user ORDER BY id")
+	serr := db.Select(&users, "SELECT id, avatar_icon FROM user")
+
+	if serr != nil {
+		fmt.Println("select user err:", serr)
+		return
+	}
 
 	for _, user := range users {
-		fmt.Println("Processing %d", )
+		fmt.Printf("Processing %d\n", user.ID)
 		var name string
 		var data []byte
 
@@ -90,12 +88,12 @@ func exportImages() {
 			fmt.Println("Err: can not know ext")
 		}
 
-		filename := fmt.Sprintf("~/isubata/webapp/public/%d.%s", user.ID, name[dotPos:])
+		filename := fmt.Sprintf("./public/%d%s", user.ID, name[dotPos:])
 
 		file, ferr := os.Create(filename)
 
 		if ferr != nil {
-			fmt.Println("bynary write error:", ferr)
+			fmt.Println("file create error:", ferr)
 			return
 		}
 
