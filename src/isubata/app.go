@@ -649,6 +649,16 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
+		dst, oerr = os.Create(fmt.Sprintf("%d%s", self.ID, ext))
+		if oerr != nil {
+			fmt.Println(oerr.Error())
+			return
+		}
+
+		io.Copy(dst, fh)
+
+		// NOTE: 静的ファイルを参照するようになったら消す
+
 		file, err := fh.Open()
 		if err != nil {
 			return err
@@ -736,9 +746,9 @@ func main() {
 		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
 	}))
 	e.Use(middleware.Static("../public"))
-	
+
 	go http.ListenAndServe(":3000", nil)
-	
+
 	e.GET("/initialize", getInitialize)
 	e.GET("/", getIndex)
 	e.GET("/register", getRegister)
