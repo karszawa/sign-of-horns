@@ -1,1 +1,2 @@
 isucon7q-initial-dataset.sql.gz filter=lfs diff=lfs merge=lfs -text
+../isubata filter=lfs diff=lfs merge=lfs -text
