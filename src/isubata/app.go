@@ -756,5 +756,13 @@ func main() {
 	e.POST("add_channel", postAddChannel)
 	e.GET("/icons/:file_name", getIcon)
 
-	e.Start("/var/run/webapp/webapp.cosk")
+	//e.Start("/var/run/webapp/webapp.cosk")
+    os.Remove("/var/run/webapp/webapp.sock")
+    l, err := net.Listen("unix", "/var/run/webapp/webapp.sock")
+    if err != nil {
+        e.Logger.Fatal(err)
+    }
+    os.Chmod("/var/run/webapp/webapp.sock", 0666)
+    e.Listener = l
+    e.Start("")
 }
