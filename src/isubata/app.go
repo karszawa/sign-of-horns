@@ -466,9 +466,9 @@ func fetchUnread(c echo.Context) error {
 	if !chIdAndMessageIds.Next() {
 		isEndFlg = true
 	} else {
+		chIdAndMessageIds.Scan(&chId,&msgId)
 		isEndFlg = false
 	}
-	chIdAndMessageIds.Scan(&chId,&msgId)
 	
 	for _, channelId := range channels {
 		var cnt int64
@@ -486,6 +486,7 @@ func fetchUnread(c echo.Context) error {
 			}
 			if chIdAndMessageIds.Next() {
 				chIdAndMessageIds.Scan(&chId, &msgId)
+				isEndFlg = false
 			}else {
 				isEndFlg = true
 			}
