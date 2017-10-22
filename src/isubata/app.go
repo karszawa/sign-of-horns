@@ -652,19 +652,24 @@ func postProfile(c echo.Context) error {
 		dst, oerr := os.Create(fmt.Sprintf("%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
-			return
+			panic("(*>△<)＜ナーンナーンっっ")
 		}
-
-		io.Copy(dst, fh)
-
-		// NOTE: 静的ファイルを参照するようになったら消す
 
 		file, err := fh.Open()
 		if err != nil {
 			return err
 		}
-		avatarData, _ = ioutil.ReadAll(file)
-		file.Close()
+		defer file.Close()
+		io.Copy(dst, file)
+
+		// NOTE: 静的ファイルを参照するようになったら消す
+
+		old_file, err := fh.Open()
+		if err != nil {
+			return err
+		}
+		avatarData, _ = ioutil.ReadAll(old_file)
+		old_file.Close()
 
 		if len(avatarData) > avatarMaxBytes {
 			return ErrBadReqeust
