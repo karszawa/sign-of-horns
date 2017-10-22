@@ -34,6 +34,7 @@ const (
 var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
+    channels_arr []ChannelInfo
 )
 
 type Renderer struct {
@@ -419,6 +420,17 @@ func queryChannels() ([]int64, error) {
 	return res, err
 }
 
+func checkChannelsData() ([]ChannelInfo){
+    var a int
+    db.Get(&a, "SELECT COUNT(*) FROM channel")
+    if a != len(channels_arr) {
+        var new_channels []ChannelInfo
+        db.Get(&new_channels, "SELECT * FROM channel ORDER BY id LIMIT ? OFFSET ?", a-len(channels_arr), len(channels_arr))
+        channels_arr = append(channels_arr, new_channels...)
+    }
+    return channels_arr
+}
+
 func queryHaveRead(userID, chID int64) (int64, error) {
 	type HaveRead struct {
 		UserID    int64     `db:"user_id"`
@@ -537,7 +549,7 @@ func getHistory(c echo.Context) error {
 	}
 
 	channels := []ChannelInfo{}
-	err = db.Select(&channels, "SELECT * FROM channel ORDER BY id")
+    channels = checkChannelsData()
 	if err != nil {
 		return err
 	}
@@ -559,7 +571,7 @@ func getProfile(c echo.Context) error {
 	}
 
 	channels := []ChannelInfo{}
-	err = db.Select(&channels, "SELECT * FROM channel ORDER BY id")
+    channels = checkChannelsData()
 	if err != nil {
 		return err
 	}
@@ -590,7 +602,7 @@ func getAddChannel(c echo.Context) error {
 	}
 
 	channels := []ChannelInfo{}
-	err = db.Select(&channels, "SELECT * FROM channel ORDER BY id")
+    channels = checkChannelsData()
 	if err != nil {
 		return err
 	}
@@ -725,6 +737,7 @@ func tRange(a, b int64) []int64 {
 }
 
 func main() {
+    channels_arr = []ChannelInfo{}
 	e := echo.New()
 	funcs := template.FuncMap{
 		"add":    tAdd,
