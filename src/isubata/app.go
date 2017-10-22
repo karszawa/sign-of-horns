@@ -455,14 +455,14 @@ func fetchUnread(c echo.Context) error {
 	for _, channelId := range channels {
 		var cnt int64
 		if isEndFlg || chId != channelId {
-			_, ok := allUnreadMsgCntCache[channelId]
-			if !ok{
+			cnt, ok := allUnreadMsgCntCache[channelId]
+			if !ok && cnt != 0{
 				_ = db.Get(&cnt,
 					"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 					channelId)
 				allUnreadMsgCntCache[channelId] = cnt
 			} else {
-				cnt = allUnreadMsgCntCache[channelId]
+				cnt, _ = allUnreadMsgCntCache[channelId]
 			}
 		} else {
 			err := db.Get(&cnt,
