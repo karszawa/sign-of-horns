@@ -359,6 +359,8 @@ func jsonifyMessage(m Message) (map[string]interface{}, error) {
 		return nil, err
 	}
 
+	fmt.Printf("avatar_icon: %s\n", u.AvatarIcon)
+
 	r := make(map[string]interface{})
 	r["id"] = m.ID
 	r["user"] = u
