@@ -3,7 +3,7 @@
 <div id="history">
   {{range .Messages}}
 	<div class="media message">
-		<img class="avatar d-flex align-self-start mr-3" src="/icons/{{.user.ID}}" alt="no avatar">
+		<img class="avatar d-flex align-self-start mr-3" src="/icons/{{.user.AvatarIcon}}" alt="no avatar">
 		<div class="media-body">
 			<h5 class="mt-0"><a href="/profile/{{.user.Name}}">{{.user.DisplayName}}@{{.user.Name}}</a></h5>
 			<p class="content">{{.content}}</p>
