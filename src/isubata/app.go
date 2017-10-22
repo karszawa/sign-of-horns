@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 	"net"
-	"bytes"
+	// "bytes"
 	_ "net/http/pprof"
 
 	"github.com/go-sql-driver/mysql"
@@ -671,15 +671,18 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		// io.Copy(dst, file)
+		_, err = io.Copy(dst, file)
+		if err != nil {
+        panic(err)
+    }
 
-		buf := new(bytes.Buffer)
-		_ = binary.Write(buf, binary.BigEndian, avatarData)
-   	_, err3 := file.Write(buf.Bytes())
- 		if err3 != nil {
- 			fmt.Println("file write err:", err3)
-			return err3
-  	}
+		// buf := new(bytes.Buffer)
+		// _ = binary.Write(buf, binary.BigEndian, avatarData)
+   // 	_, err3 := file.Write(buf.Bytes())
+ 	// 	if err3 != nil {
+ 	// 		fmt.Println("file write err:", err3)
+		// 	return err3
+  	// }
 
 		// NOTE: 静的ファイルを参照するようになったので消す
 		// old_file, err := fh.Open()
