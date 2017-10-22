@@ -774,7 +774,7 @@ func getIcon(c echo.Context) error {
 	for {
 		_, err := os.Stat(name)
 
-		if err != nil {
+		if err == nil {
 			data, _ = ioutil.ReadFile(name)
 
 			break
