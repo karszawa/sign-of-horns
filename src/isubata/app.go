@@ -663,11 +663,16 @@ func postProfile(c echo.Context) error {
 			return oerr
 		}
 
-		file := fh.Open()
+		file, ferr := fh.Open()
+		if ferr != nil {
+			fmt.Println(ferr.Error())
+			return ferr
+		}
 
 		_, err = io.Copy(dst, file)
 		if err != nil {
-        panic(err)
+				fmt.Println(err.Error())
+				return err
     }
 
 		defer file.Close()
