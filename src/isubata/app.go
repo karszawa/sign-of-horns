@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	
+	_ "net/http/pprof"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -734,7 +736,9 @@ func main() {
 		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
 	}))
 	e.Use(middleware.Static("../public"))
-
+	
+	go http.ListenAndServe(":3000", nil)
+	
 	e.GET("/initialize", getInitialize)
 	e.GET("/", getIndex)
 	e.GET("/register", getRegister)
