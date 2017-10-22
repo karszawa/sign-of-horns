@@ -653,7 +653,9 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		dst, oerr := os.Create(fmt.Sprintf("../public/icons/%d%s", self.ID, ext))
+		fmt.Printf("fh.Size: %d\n", fh.Size)
+
+		dst, oerr := os.Create(fmt.Sprintf("/home/isucon/isubata/webapp/public/icons/%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
 			return oerr
@@ -665,6 +667,7 @@ func postProfile(c echo.Context) error {
 		}
 
 		avatarData, _ = ioutil.ReadAll(file)
+		fmt.Printf("len(avatarData): %d\n", len(avatarData))
 
 		// NOTE: これは必要かも？
 		if len(avatarData) > avatarMaxBytes {
