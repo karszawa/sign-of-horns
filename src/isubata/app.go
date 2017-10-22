@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -664,10 +663,14 @@ func postProfile(c echo.Context) error {
 			return oerr
 		}
 
+		file := fh.Open()
+
 		_, err = io.Copy(dst, file)
 		if err != nil {
         panic(err)
     }
+
+		defer file.Close()
 
 		// buf := new(bytes.Buffer)
 		// _ = binary.Write(buf, binary.BigEndian, avatarData)
