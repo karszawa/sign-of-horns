@@ -477,7 +477,7 @@ func fetchUnread(c echo.Context) error {
 			fmt.Println(3)
 			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
-				chId)
+				channelId)
 			if err !=nil {
 				fmt.Println(err)
 			}
@@ -485,7 +485,7 @@ func fetchUnread(c echo.Context) error {
 			fmt.Println(4)
 			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
-				chId, msgId)
+					channelId, msgId)
 			if err!= nil {
 				fmt.Println(err)
 			}
@@ -497,7 +497,7 @@ func fetchUnread(c echo.Context) error {
 		}
 		fmt.Println(5)
 		r := map[string]interface{}{
-			"channel_id": chId,
+			"channel_id": channelId,
 			"unread":     cnt}
 		resp = append(resp, r)
 		fmt.Println("end roop")
