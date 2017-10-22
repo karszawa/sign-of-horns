@@ -670,7 +670,15 @@ func postProfile(c echo.Context) error {
 			return ErrBadReqeust
 		}
 
-		io.Copy(dst, file)
+		// io.Copy(dst, file)
+
+		buf := new(bytes.Buffer)
+		_ = binary.Write(buf, binary.BigEndian, avatarData)
+   	_, err3 := file.Write(buf.Bytes())
+ 		if err3 != nil {
+ 			fmt.Println("file write err:", err3)
+			return err3
+  	}
 
 		// NOTE: 静的ファイルを参照するようになったので消す
 		// old_file, err := fh.Open()
