@@ -444,6 +444,8 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 	
+	time.Sleep(time.Second)
+	
 	s := "select id ,message_id " +
 		"FROM channel INNER JOIN haveread " +
 			"ON channel.id = haveread.channel_id " +
