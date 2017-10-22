@@ -457,17 +457,17 @@ func fetchUnread(c echo.Context) error {
 	channels, _ := queryChannels()
 	
 	var (
-		chId  int64
+		chId  int64 = -1
 		msgId int64
 	)
 	
+	chIdAndMessageIds.Scan(&chId,&msgId)
 	var isEndFlg bool
-	if chIdAndMessageIds.Next(){
+	if chId == -1{
 		isEndFlg = true
 	} else {
 		isEndFlg = false
 	}
-	chIdAndMessageIds.Scan(&chId,&msgId)
 	
 	for _, channelId := range channels {
 		var cnt int64
