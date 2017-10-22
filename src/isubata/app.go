@@ -652,7 +652,7 @@ func postProfile(c echo.Context) error {
 		dst, oerr := os.Create(fmt.Sprintf("%d%s", self.ID, ext))
 		if oerr != nil {
 			fmt.Println(oerr.Error())
-			panic("(*>△<)＜ナーンナーンっっ")
+			return oerr
 		}
 
 		file, err := fh.Open()
