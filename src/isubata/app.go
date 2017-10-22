@@ -446,6 +446,11 @@ func fetchUnread(c echo.Context) error {
 	
 	time.Sleep(time.Second)
 	
+	channels, err := queryChannels()
+	if err != nil {
+		return err
+	}
+	
 	s := "select id ,message_id " +
 		"FROM channel INNER JOIN haveread " +
 			"ON channel.id = haveread.channel_id " +
@@ -453,8 +458,6 @@ func fetchUnread(c echo.Context) error {
 	chIdAndMessageIds, _ := db.Query(s, userID)
 	
 	resp := []map[string]interface{}{}
-	
-	channels, _ := queryChannels()
 	
 	var (
 		chId  int64
@@ -471,17 +474,21 @@ func fetchUnread(c echo.Context) error {
 	
 	for _, channelId := range channels {
 		var cnt int64
-		if isEndFlg || chId != channelId {
+		if isEndFlg || chId != channelId{
 			err := db.Get(&cnt,
 				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
 				channelId)
 			if err !=nil {
 			}
 		} else {
-			err := db.Get(&cnt,
-				"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
+			if msgId > 0 {
+				_ = db.Get(&cnt,
+					"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ? AND ? < id",
 					channelId, msgId)
-			if err!= nil {
+			} else {
+				_ = db.Get(&cnt,
+					"SELECT COUNT(*) as cnt FROM message WHERE channel_id = ?",
+					channelId)
 			}
 			if chIdAndMessageIds.Next() {
 				chIdAndMessageIds.Scan(&chId, &msgId)
