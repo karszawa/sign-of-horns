@@ -444,15 +444,10 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 	
-	
-	
 	s := "SELECT channel.id, haveread.message_id" +
 		"FROM channel, haveread" +
 				"WHERE channel.id = haveread.channel_id, haveread.user_id = ?"
 	chIdAndMessageIds, err := db.Query(s, userID)
-	
-	// ??
-	time.Sleep(time.Second)
 	
 	resp := []map[string]interface{}{}
 
@@ -462,6 +457,7 @@ func fetchUnread(c echo.Context) error {
 			chId  int64
 			msgId int64
 		)
+		fmt.Printf("chid: %ld, msgId; %ld", chId, msgId)
 		
 		chIdAndMessageIds.Scan(&chId,&msgId)
 		
