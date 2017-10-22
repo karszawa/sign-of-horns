@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"net"
+	_ "net/http/pprof"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -744,7 +746,9 @@ func main() {
 		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
 	}))
 	e.Use(middleware.Static("../public"))
-
+	
+	go http.ListenAndServe(":3000", nil)
+	
 	e.GET("/initialize", getInitialize)
 	e.GET("/", getIndex)
 	e.GET("/register", getRegister)
@@ -766,5 +770,13 @@ func main() {
 	e.POST("add_channel", postAddChannel)
 	e.GET("/icons/:file_name", getIcon)
 
-	e.Start(":5000")
+	//e.Start("/var/run/webapp/webapp.cosk")
+    os.Remove("/var/run/webapp/webapp.sock")
+    l, err := net.Listen("unix", "/var/run/webapp/webapp.sock")
+    if err != nil {
+        e.Logger.Fatal(err)
+    }
+    os.Chmod("/var/run/webapp/webapp.sock", 0666)
+    e.Listener = l
+    e.Start("")
 }
