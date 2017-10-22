@@ -33,6 +33,7 @@ const (
 )
 
 var (
+	pair_ip string
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
     users_map map[int64]User
@@ -85,6 +86,8 @@ func init() {
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(5 * time.Minute)
 	log.Printf("Succeeded to connect db.")
+
+	pair_ip = os.Getenv("PAIR_IP")
 }
 
 type User struct {
@@ -771,17 +774,15 @@ func getIcon(c echo.Context) error {
 
 	var data []byte
 
-	for {
-		_, err := os.Stat(name)
+	_, err := os.Stat(name)
 
-		if err == nil {
-			data, _ = ioutil.ReadFile(name)
+	if err == nil {
+		data, _ = ioutil.ReadFile(name)
 
-			break
-		}
+		return c.Blob(http.StatusOK, mime, data)
+	} else {
+		return 	c.Redirect(http.StatusSeeOther, fmt.Sprint("http://%s/icons/%s", pair_ip, name))
 	}
-
-	return c.Blob(http.StatusOK, mime, data)
 }
 
 func tAdd(a, b int64) int64 {
